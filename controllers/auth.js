@@ -1,17 +1,30 @@
 import admin from "../firebase";
+import User from "../models/user";
 
 export const currentUser = async (req, res) => {
-    const idToken = req.headers.token;
-    console.log(idToken)
+    console.log("REQ HEADERS TOKEN", req.headers.token);
     try {
-        const firebaseUser = await admin.auth().verifyIdToken(idToken);
-        console.log('FIREBASE USER IN CURRENT USER MIDDLEWARE', firebaseUser);
-        res.json(firebaseUser)
+        const firebaseUser = await admin.auth().verifyIdToken(req.headers.token);
+        // console.log("FIREBASE USER IN CURRENT USER MIDDLEWARE", firebaseUser);
+        //guarde al usuario en la base de datos o envíe la respuesta del usuario si ya está guardada
+        const user = await User.findOne({email: firebaseUser.email});
+        if (user){
 
-    }catch (error){
-        console.log(error)
+        }else {
+
+        }
+        res.json(firebaseUser);
+    } catch (err) {
+        console.log(err);
         res.status(401).json({
-            error: 'Invalid or expired token'
-        })
+            err: "Invalid or expired token",
+        });
     }
+}
+
+export const privateRoute = async (req, res) => {
+    console.log("REQ HEADERS TOKEN IN PRIVATE ROUTE",  req.headers.token);
+    res.json({
+        ok: true
+    })
 }
